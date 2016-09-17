@@ -91,7 +91,8 @@ public class DownloadPodcustService extends IntentService {
         for (Podcast podcast : list) {
             podcast = list.get(i);
 //            Podcast pod = Podcast.selectByMP3(podcast.getMp3());
-           podcast.save();
+            Log.d("select", "select mp3 = " + podcast.getMp3());
+            podcast.save();
             ++i;
         }
     }

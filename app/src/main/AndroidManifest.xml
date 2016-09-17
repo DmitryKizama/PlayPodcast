@@ -23,16 +23,18 @@
             android:name="AA_MODELS"
             android:value="stdmitry.playerpodcast.database.Podcast" />
 
-        <activity android:name=".PlayerActivity">
+        <activity android:name=".activity.PlayerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".activity.ItemActivity"/>
 
         <service android:name=".services.DownloadPodcustService" />
+        <service android:name=".services.PlayPodcastService" />
+
     </application>
 
 </manifest>

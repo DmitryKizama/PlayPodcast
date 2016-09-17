@@ -17,10 +17,10 @@ public class Podcast extends Model {
     public static final String SUMMARY = "summary";
     public static final String AUTHOR = "author";
 
-    @Column(name = TITLE)
+    @Column(name = TITLE, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     private String title;
 
-    @Column(name = PUBDATE)
+    @Column(name = PUBDATE, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     private String pubdate;
 
     @Column(name = ENCLOSURE, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)

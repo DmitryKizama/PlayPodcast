@@ -1,4 +1,4 @@
-package stdmitry.playerpodcast;
+package stdmitry.playerpodcast.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,15 +13,18 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import stdmitry.playerpodcast.R;
 import stdmitry.playerpodcast.adapter.PlayListAdapter;
 import stdmitry.playerpodcast.services.DownloadPodcustService;
 
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements PlayListAdapter.PlayListAdapterListener {
 
     private RecyclerView recyclerView;
     private PlayListAdapter adapter;
     private ProgressBar progressBar;
+
+    public static final String EXTRAKEY = "url";
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -33,7 +36,7 @@ public class PlayerActivity extends AppCompatActivity {
                 String string = bundle.getString(DownloadPodcustService.FILEPATH);
                 int resultCode = bundle.getInt(DownloadPodcustService.RESULT);
                 if (resultCode == RESULT_OK) {
-                    adapter = new PlayListAdapter(context);
+                    adapter = new PlayListAdapter(context, PlayerActivity.this);
                     recyclerView.setAdapter(adapter);
 
                     LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -63,6 +66,13 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onClickItem(String url) {
+        Intent intent = new Intent(PlayerActivity.this, ItemActivity.class);
+        intent.putExtra(EXTRAKEY,url);
+        startActivity(intent);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(
@@ -74,5 +84,6 @@ public class PlayerActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(receiver);
     }
+
 
 }

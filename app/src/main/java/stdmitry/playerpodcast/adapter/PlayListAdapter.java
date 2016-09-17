@@ -14,10 +14,16 @@ import stdmitry.playerpodcast.database.Podcast;
 
 public class PlayListAdapter extends RecyclerView.Adapter<PlayListViewHolder> {
 
+    public interface PlayListAdapterListener {
+        void onClickItem(String url);
+    }
+
+    private PlayListAdapterListener listener;
     private List<Podcast> list;
 
-    public PlayListAdapter(Context context) {
+    public PlayListAdapter(Context context, PlayListAdapterListener lis) {
         list = Podcast.getAll();
+        this.listener = lis;
         Log.d("Adapter", "size = " + list.size());
     }
 
@@ -29,10 +35,17 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListViewHolder> {
 
     @Override
     public void onBindViewHolder(PlayListViewHolder holder, int position) {
-        Podcast p = list.get(holder.getAdapterPosition());
+        final Podcast p = list.get(holder.getAdapterPosition());
 //        Log.d("Adapter", "On bind");
 //        Log.d("Adapter", "title = " + p.getTitle());
         holder.title.setText(p.getTitle());
+
+        holder.title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onClickItem(p.getMp3());
+            }
+        });
     }
 
     @Override
