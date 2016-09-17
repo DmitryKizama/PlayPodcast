@@ -68,7 +68,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayListAdapter
     @Override
     public void onClickItem(String url) {
         Intent intent = new Intent(PlayerActivity.this, ItemActivity.class);
-        intent.putExtra(EXTRAKEY,url);
+        intent.putExtra(EXTRAKEY, url);
+        if (url == null) {
+            Toast.makeText(this, "Podcast hasn`t mp3", Toast.LENGTH_SHORT).show();
+            return;
+        }
         startActivity(intent);
     }
 

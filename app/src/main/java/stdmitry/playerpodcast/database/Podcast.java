@@ -14,7 +14,7 @@ public class Podcast extends Model {
     public static final String TITLE = "title";
     public static final String PUBDATE = "pubDate";
     public static final String ENCLOSURE = "enclosure";
-    public static final String SUMMARY = "summary";
+    public static final String SUMMARY = "subtitle";
     public static final String AUTHOR = "author";
 
     @Column(name = TITLE, unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)

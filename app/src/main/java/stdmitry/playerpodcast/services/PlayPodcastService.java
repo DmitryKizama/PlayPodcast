@@ -52,25 +52,19 @@ public class PlayPodcastService extends Service {
             mediaPlayer.prepare();
             prepared = true;
         } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
             Log.d("IllegarArgument", e.getMessage());
             prepared = false;
             e.printStackTrace();
         } catch (SecurityException e) {
-            // TODO Auto-generated catch block
             prepared = false;
             e.printStackTrace();
         } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
             prepared = false;
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             prepared = false;
             e.printStackTrace();
         }
-        Log.d(LOGD, "onBind");
-        Log.d(LOGD, "onBind url = " + urlPath);
         if (prepared) {
             final Intent actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
             actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
@@ -88,9 +82,6 @@ public class PlayPodcastService extends Service {
                     boolean status = intent.getBooleanExtra(BROADCAST_TASK, false);
                     int progress = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_PROGRESS, 0);
                     int max = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_MAX, 1);
-                    Log.d(PlayPodcastService.LOGD, "current location = " + progress);
-                    Log.d(PlayPodcastService.LOGD, "max duration = " + mediaPlayer.getDuration());
-                    Log.d(PlayPodcastService.LOGD, "seek bar max = " + max);
                     if (status) {
                         double result = (double) mediaPlayer.getDuration() * ((double) progress / (double) max);
                         mediaPlayer.seekTo((int) result);
@@ -150,6 +141,7 @@ public class PlayPodcastService extends Service {
         mediaPlayer.stop();
         mediaPlayer.reset();
         mediaPlayer.release();
+        unregisterReceiver(br);
     }
 
     @Override

@@ -39,6 +39,7 @@ public class PlayListAdapter extends RecyclerView.Adapter<PlayListViewHolder> {
 //        Log.d("Adapter", "On bind");
 //        Log.d("Adapter", "title = " + p.getTitle());
         holder.title.setText(p.getTitle());
+        holder.time.setText(p.getPubdate());
 
         holder.title.setOnClickListener(new View.OnClickListener() {
             @Override

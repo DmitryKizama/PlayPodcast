@@ -14,9 +14,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import stdmitry.playerpodcast.R;
+import stdmitry.playerpodcast.database.Podcast;
 import stdmitry.playerpodcast.services.PlayPodcastService;
 
 public class ItemActivity extends AppCompatActivity {
@@ -27,6 +29,7 @@ public class ItemActivity extends AppCompatActivity {
 
     private Button btnPlay;
     private SeekBar seekBar;
+    private TextView description, date, authors, title;
 
     private boolean playPause = false;
     private BroadcastReceiver broadcastReceiver;
@@ -51,23 +54,32 @@ public class ItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item);
         getExtras(savedInstanceState);
-
+        Podcast podcast = Podcast.selectByMP3(url);
         final Intent intentAction = new Intent(PlayPodcastService.BROADCAST_ACTION);
 
         btnPlay = (Button) findViewById(R.id.btn_play);
         seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar.setProgress(0);
+        description = (TextView) findViewById(R.id.description);
+        authors = (TextView) findViewById(R.id.authors);
+        date = (TextView) findViewById(R.id.date);
+        title = (TextView) findViewById(R.id.title);
+
+        description.setText("Description: " + podcast.getDescription());
+        authors.setText("Authors: " + podcast.getAuthor());
+        date.setText("Date: " + podcast.getPubdate());
+        title.setText(podcast.getTitle());
+
 
         seekBar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                Log.d("onClickSeekBar","setOnTouchListener");
+                Log.d("onClickSeekBar", "setOnTouchListener");
                 intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_PROGRESS, seekBar.getProgress());
                 sendBroadcast(intentAction);
                 return false;
             }
         });
-
 
 
         broadcastReceiver = new BroadcastReceiver() {
@@ -89,14 +101,11 @@ public class ItemActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(PlayPodcastService.LOGD, "onClick in Item");
 
-                if (url == null) {
-                    Toast.makeText(view.getContext(), "Podcast hasn`t mp3", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+
                 Log.d(PlayPodcastService.LOGD, "url = " + url);
                 if (!playPause) {
                     Log.d(PlayPodcastService.LOGD, "Play");
-//                    btnPlay.changePicture()
+                    btnPlay.setBackgroundResource(R.mipmap.ic_pause);
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_PROGRESS, seekBar.getProgress());
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_MAX, seekBar.getMax());
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK, true);
@@ -104,7 +113,7 @@ public class ItemActivity extends AppCompatActivity {
                     playPause = true;
                 } else {
                     Log.d(PlayPodcastService.LOGD, "Pause");
-//                    btnPlay.changePicture()
+                    btnPlay.setBackgroundResource(R.mipmap.ic_play);
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK, false);
                     sendBroadcast(intentAction);
                     playPause = false;
@@ -119,6 +128,7 @@ public class ItemActivity extends AppCompatActivity {
         if (!bound) return;
         unbindService(sConn);
         bound = false;
+        unregisterReceiver(broadcastReceiver);
     }
 
     private void getExtras(Bundle savedInstanceState) {
