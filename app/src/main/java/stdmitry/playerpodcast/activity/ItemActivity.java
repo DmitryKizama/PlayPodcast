@@ -8,14 +8,17 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import stdmitry.playerpodcast.R;
 import stdmitry.playerpodcast.database.Podcast;
@@ -26,10 +29,14 @@ public class ItemActivity extends AppCompatActivity {
     public final static String BROADCAST_ACTION_ITEMACTIVITY = "ItemActivity";
     public final static String BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY = "ItemActivityProgress";
     public final static String BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY = "MaxDuration";
+    public final static String PROGRESS_BAR_SHOW = "ProgressBarAction";
+    public final static String CLOSE_ACTIVITY = "Close";
 
     private Button btnPlay;
     private SeekBar seekBar;
     private TextView description, date, authors, title;
+    private ImageView imageView;
+    private ProgressBar progressBar;
 
     private boolean playPause = false;
     private BroadcastReceiver broadcastReceiver;
@@ -39,11 +46,13 @@ public class ItemActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.d("ALOHA", "onServiceConnected!");
             bound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.d("ALOHA", "onServiceDisconnected!");
             bound = false;
         }
     };
@@ -52,11 +61,14 @@ public class ItemActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("ALOHA", "ON CREATE!");
         setContentView(R.layout.activity_item);
         getExtras(savedInstanceState);
         Podcast podcast = Podcast.selectByMP3(url);
         final Intent intentAction = new Intent(PlayPodcastService.BROADCAST_ACTION);
 
+        progressBar = (ProgressBar) findViewById(R.id.progressBarItem);
+        progressBar.setVisibility(View.VISIBLE);
         btnPlay = (Button) findViewById(R.id.btn_play);
         seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar.setProgress(0);
@@ -64,6 +76,14 @@ public class ItemActivity extends AppCompatActivity {
         authors = (TextView) findViewById(R.id.authors);
         date = (TextView) findViewById(R.id.date);
         title = (TextView) findViewById(R.id.title);
+        imageView = (ImageView) findViewById(R.id.img_view);
+        imageView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                int size = Math.min(imageView.getMeasuredWidth(), imageView.getMeasuredHeight());
+                imageView.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+            }
+        });
 
         description.setText("Description: " + podcast.getDescription());
         authors.setText("Authors: " + podcast.getAuthor());
@@ -75,7 +95,14 @@ public class ItemActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 Log.d("onClickSeekBar", "setOnTouchListener");
+                if (!playPause) {
+                    btnPlay.setBackgroundResource(R.mipmap.ic_pause);
+                    playPause = true;
+                }
+                progressBar.setVisibility(View.VISIBLE);
                 intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_PROGRESS, seekBar.getProgress());
+                intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_MAX, seekBar.getMax());
+                intentAction.putExtra(PlayPodcastService.BROADCAST_TASK, true);
                 sendBroadcast(intentAction);
                 return false;
             }
@@ -83,11 +110,19 @@ public class ItemActivity extends AppCompatActivity {
 
 
         broadcastReceiver = new BroadcastReceiver() {
+
             public void onReceive(Context context, Intent intent) {
                 int currentDuration = intent.getIntExtra(BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY, 0);
                 int max = intent.getIntExtra(BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, 1);
                 double result = (double) currentDuration * (double) seekBar.getMax() / (double) max;
                 seekBar.setProgress((int) result);
+                boolean flag = intent.getBooleanExtra(PROGRESS_BAR_SHOW, false);
+                if (flag) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                if (intent.getBooleanExtra(CLOSE_ACTIVITY, false)) {
+                    finish();
+                }
             }
         };
         IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION_ITEMACTIVITY);
@@ -99,11 +134,8 @@ public class ItemActivity extends AppCompatActivity {
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(PlayPodcastService.LOGD, "onClick in Item");
-
-
-                Log.d(PlayPodcastService.LOGD, "url = " + url);
                 if (!playPause) {
+                    progressBar.setVisibility(View.VISIBLE);
                     Log.d(PlayPodcastService.LOGD, "Play");
                     btnPlay.setBackgroundResource(R.mipmap.ic_pause);
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_PROGRESS, seekBar.getProgress());
@@ -120,6 +152,18 @@ public class ItemActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override

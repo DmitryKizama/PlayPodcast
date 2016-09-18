@@ -70,7 +70,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayListAdapter
         Intent intent = new Intent(PlayerActivity.this, ItemActivity.class);
         intent.putExtra(EXTRAKEY, url);
         if (url == null) {
-            Toast.makeText(this, "Podcast hasn`t mp3", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Podcast doesn`t has mp3", Toast.LENGTH_SHORT).show();
             return;
         }
         startActivity(intent);

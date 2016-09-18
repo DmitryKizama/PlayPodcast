@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="5">
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="4"
+        android:layout_above="@+id/layout_play"
         android:background="@android:color/white">
 
         <LinearLayout
@@ -17,8 +15,9 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="400dp"
-                android:layout_height="400dp"
+                android:id="@+id/img_view"
+                android:layout_width="match_parent"
+                android:layout_height="1000dp"
                 android:layout_gravity="center"
                 android:src="@drawable/cover" />
 
@@ -57,9 +56,10 @@
     </ScrollView>
 
     <LinearLayout
+        android:id="@+id/layout_play"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_alignParentBottom="true"
         android:background="@drawable/shadow_1"
         android:orientation="vertical">
 
@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginBottom="10dp"
-            android:backgroundTint="@color/background"
+            android:layout_marginTop="10dp"
             android:max="50000000" />
 
         <Button
@@ -82,5 +82,12 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progressBarItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:progressDrawable="@mipmap/ic_loading" />
 
-</LinearLayout>
+</RelativeLayout>

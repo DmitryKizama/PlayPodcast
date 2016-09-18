@@ -173,10 +173,6 @@ public class DownloadPodcustService extends IntentService {
         switch (s) {
             case Podcast.ITEM:
                 if (num == 0) {
-                    if (podcast != null) {
-                        list.add(podcast);
-                    }
-                    podcast = Podcast.create();
                     bItem = true;
                 } else
                     bItem = false;
@@ -190,23 +186,29 @@ public class DownloadPodcustService extends IntentService {
             case Podcast.ENCLOSURE:
                 benclosure = true;
                 break;
-            case Podcast.AUTHOR:
+            case "author":
                 if (num == 0)
                     bauthor = true;
                 else
                     bauthor = false;
                 break;
             case Podcast.PUBDATE:
-                if (num == 0)
+                if (num == 0) {
                     bpubdate = true;
-                else
+                } else
                     bpubdate = false;
                 break;
             case Podcast.SUMMARY:
-                if (num == 0)
+                if (num == 0) {
+
                     bsummary = true;
-                else
+                } else {
+                    if (podcast != null) {
+                        list.add(podcast);
+                    }
+                    podcast = Podcast.create();
                     bsummary = false;
+                }
                 break;
         }
     }
