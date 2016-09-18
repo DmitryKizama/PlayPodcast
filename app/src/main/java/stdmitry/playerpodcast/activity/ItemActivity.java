@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -70,6 +69,7 @@ public class ItemActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBarItem);
         progressBar.setVisibility(View.VISIBLE);
         btnPlay = (Button) findViewById(R.id.btn_play);
+        btnPlay.setVisibility(View.GONE);
         seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar.setProgress(0);
         description = (TextView) findViewById(R.id.description);
@@ -119,6 +119,7 @@ public class ItemActivity extends AppCompatActivity {
                 boolean flag = intent.getBooleanExtra(PROGRESS_BAR_SHOW, false);
                 if (flag) {
                     progressBar.setVisibility(View.GONE);
+                    btnPlay.setVisibility(View.VISIBLE);
                 }
                 if (intent.getBooleanExtra(CLOSE_ACTIVITY, false)) {
                     finish();
@@ -163,7 +164,6 @@ public class ItemActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        progressBar.setVisibility(View.GONE);
     }
 
     @Override

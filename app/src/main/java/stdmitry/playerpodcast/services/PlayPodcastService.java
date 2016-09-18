@@ -8,10 +8,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
@@ -56,7 +53,33 @@ public class PlayPodcastService extends Service {
                     sendBroadcast(actionIntent);
                 }
             });
-            mediaPlayer.prepare();
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(final MediaPlayer mediaPlayer) {
+                    actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
+                    actionIntent.putExtra(ItemActivity.PROGRESS_BAR_SHOW, true);
+                    sendBroadcast(actionIntent);
+
+                    br = new BroadcastReceiver() {
+                        public void onReceive(Context context, Intent intent) {
+                            boolean playOrpause = intent.getBooleanExtra(BROADCAST_TASK, false);
+                            if (!playOrpause) {
+                                mediaPlayer.pause();
+                                return;
+                            }
+                            int progress = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_PROGRESS, 0);
+                            int max = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_MAX, 1);
+                            double result = (double) mediaPlayer.getDuration() * ((double) progress / (double) max);
+                            mediaPlayer.seekTo((int) result);
+                            Log.d(PlayPodcastService.LOGD, "result = " + result);
+                            mediaPlayer.start();
+                        }
+                    };
+                    IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
+                    registerReceiver(br, intFilt);
+                }
+            });
             prepared = true;
         } catch (IllegalArgumentException e) {
             Log.d("IllegarArgument", e.getMessage());
@@ -74,8 +97,6 @@ public class PlayPodcastService extends Service {
         }
         if (prepared) {
 
-            actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
-            sendBroadcast(actionIntent);
             mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
@@ -85,38 +106,7 @@ public class PlayPodcastService extends Service {
                 }
             });
 
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    actionIntent.putExtra(ItemActivity.PROGRESS_BAR_SHOW, true);
-                    sendBroadcast(actionIntent);
-                }
-            });
 
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mediaPlayer) {
-
-                }
-            });
-
-            br = new BroadcastReceiver() {
-                public void onReceive(Context context, Intent intent) {
-                    boolean playOrpause = intent.getBooleanExtra(BROADCAST_TASK, false);
-                    if (!playOrpause) {
-                        mediaPlayer.pause();
-                        return;
-                    }
-                    int progress = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_PROGRESS, 0);
-                    int max = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_MAX, 1);
-                    double result = (double) mediaPlayer.getDuration() * ((double) progress / (double) max);
-                    mediaPlayer.seekTo((int) result);
-                    Log.d(PlayPodcastService.LOGD, "result = " + result);
-                    mediaPlayer.start();
-                }
-            };
-            IntentFilter intFilt = new IntentFilter(BROADCAST_ACTION);
-            registerReceiver(br, intFilt);
             Log.d(LOGD, "onCreate");
 
         }
@@ -160,7 +150,10 @@ public class PlayPodcastService extends Service {
         mediaPlayer.stop();
         mediaPlayer.reset();
         mediaPlayer.release();
-        unregisterReceiver(br);
+        if (br != null) {
+            unregisterReceiver(br);
+            br = null;
+        }
     }
 
     @Override
@@ -168,50 +161,5 @@ public class PlayPodcastService extends Service {
         Log.d("ALOHA", "onLowMemory");
     }
 
-    private class BackgroundLooperThread extends HandlerThread {
 
-        private static final int DO_JOB = 1;
-        private static final int CANCEL_ANIM_JOB = 2;
-
-        private Handler mHandler;
-
-        public BackgroundLooperThread() {
-            super("BackgroundLooperThread");
-        }
-
-        @Override
-        protected void onLooperPrepared() {
-            super.onLooperPrepared();
-
-            mHandler = new Handler(getLooper()) {
-                @Override
-                public void handleMessage(Message msg) {
-
-                    switch (msg.what) {
-                        case DO_JOB:
-                            if (!isAnimForceStopped){
-                                launchAnimation();
-                            }
-
-                            break;
-                        case CANCEL_ANIM_JOB:
-                            stopAnimPrivate();
-                            break;
-                    }
-                }
-            };
-        }
-
-        public void launchAnimAsync() {
-            if (mHandler != null) {
-                mHandler.sendEmptyMessage(DO_JOB);
-            }
-        }
-
-        public void cancelAnimAsync() {
-            if (mHandler != null) {
-                mHandler.sendEmptyMessage(CANCEL_ANIM_JOB);
-            }
-        }
-    }
 }
