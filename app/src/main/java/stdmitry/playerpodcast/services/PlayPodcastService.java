@@ -25,7 +25,6 @@ public class PlayPodcastService extends Service {
     public final static String BROADCAST_TASK_SEEK_BAR_MAX = "MaxSeekBar";
 
     private MediaPlayer mediaPlayer;
-    private boolean intialStage = true;
     private String urlPath;
     private int currentPosition = 0;
     private BroadcastReceiver br;
@@ -46,9 +45,8 @@ public class PlayPodcastService extends Service {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     // TODO Auto-generated method stub
-                    intialStage = true;
-                    mediaPlayer.stop();
-                    mediaPlayer.reset();
+                    mediaPlayer.pause();
+                    mediaPlayer.seekTo(0);
                     actionIntent.putExtra(ItemActivity.CLOSE_ACTIVITY, true);
                     sendBroadcast(actionIntent);
                 }
@@ -59,8 +57,10 @@ public class PlayPodcastService extends Service {
                 public void onPrepared(final MediaPlayer mediaPlayer) {
                     actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
                     actionIntent.putExtra(ItemActivity.PROGRESS_BAR_SHOW, true);
+                    Log.d("ALLOHA", "------------------CALED-------------");
                     sendBroadcast(actionIntent);
-
+                    mediaPlayer.start();
+                    mediaPlayer.pause();
                     br = new BroadcastReceiver() {
                         public void onReceive(Context context, Intent intent) {
                             boolean playOrpause = intent.getBooleanExtra(BROADCAST_TASK, false);
@@ -71,6 +71,7 @@ public class PlayPodcastService extends Service {
                             int progress = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_PROGRESS, 0);
                             int max = intent.getIntExtra(BROADCAST_TASK_SEEK_BAR_MAX, 1);
                             double result = (double) mediaPlayer.getDuration() * ((double) progress / (double) max);
+                            mediaPlayer.pause();
                             mediaPlayer.seekTo((int) result);
                             Log.d(PlayPodcastService.LOGD, "result = " + result);
                             mediaPlayer.start();
@@ -101,7 +102,7 @@ public class PlayPodcastService extends Service {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
                     actionIntent.putExtra(ItemActivity.BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY, mediaPlayer.getCurrentPosition());
-                    actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
+//                    actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
                     sendBroadcast(actionIntent);
                 }
             });

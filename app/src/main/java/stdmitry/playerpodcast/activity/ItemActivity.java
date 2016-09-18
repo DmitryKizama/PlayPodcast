@@ -41,6 +41,8 @@ public class ItemActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver;
     private String url;
     private boolean bound = false;
+    private int maxDuration;
+
     private ServiceConnection sConn = new ServiceConnection() {
 
         @Override
@@ -108,13 +110,13 @@ public class ItemActivity extends AppCompatActivity {
             }
         });
 
-
         broadcastReceiver = new BroadcastReceiver() {
+
 
             public void onReceive(Context context, Intent intent) {
                 int currentDuration = intent.getIntExtra(BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY, 0);
-                int max = intent.getIntExtra(BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, 1);
-                double result = (double) currentDuration * (double) seekBar.getMax() / (double) max;
+                maxDuration = intent.getIntExtra(BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, maxDuration);
+                double result = (double) currentDuration * (double) seekBar.getMax() / (double) maxDuration;
                 seekBar.setProgress((int) result);
                 boolean flag = intent.getBooleanExtra(PROGRESS_BAR_SHOW, false);
                 if (flag) {
@@ -122,7 +124,7 @@ public class ItemActivity extends AppCompatActivity {
                     btnPlay.setVisibility(View.VISIBLE);
                 }
                 if (intent.getBooleanExtra(CLOSE_ACTIVITY, false)) {
-                    finish();
+                    setPlayBtnResourse(true);
                 }
             }
         };
@@ -136,23 +138,31 @@ public class ItemActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!playPause) {
+                    setPlayBtnResourse(false);
                     progressBar.setVisibility(View.VISIBLE);
                     Log.d(PlayPodcastService.LOGD, "Play");
-                    btnPlay.setBackgroundResource(R.mipmap.ic_pause);
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_PROGRESS, seekBar.getProgress());
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK_SEEK_BAR_MAX, seekBar.getMax());
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK, true);
                     sendBroadcast(intentAction);
-                    playPause = true;
                 } else {
+                    setPlayBtnResourse(true);
                     Log.d(PlayPodcastService.LOGD, "Pause");
-                    btnPlay.setBackgroundResource(R.mipmap.ic_play);
                     intentAction.putExtra(PlayPodcastService.BROADCAST_TASK, false);
                     sendBroadcast(intentAction);
-                    playPause = false;
                 }
             }
         });
+    }
+
+    private void setPlayBtnResourse(boolean isPlay){
+        if (!isPlay){
+            btnPlay.setBackgroundResource(R.mipmap.ic_pause);
+            playPause = true;
+        } else {
+            btnPlay.setBackgroundResource(R.mipmap.ic_play);
+            playPause = false;
+        }
     }
 
     @Override
