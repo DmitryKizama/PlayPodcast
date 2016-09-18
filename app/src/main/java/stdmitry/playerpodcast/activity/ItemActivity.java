@@ -29,7 +29,7 @@ public class ItemActivity extends AppCompatActivity {
     public final static String BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY = "ItemActivityProgress";
     public final static String BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY = "MaxDuration";
     public final static String PROGRESS_BAR_SHOW = "ProgressBarAction";
-    public final static String CLOSE_ACTIVITY = "Close";
+    public final static String FINISH_PLAY = "Close";
 
     private Button btnPlay;
     private SeekBar seekBar;
@@ -123,7 +123,7 @@ public class ItemActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     btnPlay.setVisibility(View.VISIBLE);
                 }
-                if (intent.getBooleanExtra(CLOSE_ACTIVITY, false)) {
+                if (intent.getBooleanExtra(FINISH_PLAY, false)) {
                     setPlayBtnResourse(true);
                 }
             }

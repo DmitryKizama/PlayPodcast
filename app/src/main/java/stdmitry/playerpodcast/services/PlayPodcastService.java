@@ -28,13 +28,13 @@ public class PlayPodcastService extends Service {
     private String urlPath;
     private int currentPosition = 0;
     private BroadcastReceiver br;
-    private Intent actionIntent;
+//    private Intent actionIntent;
 
     @Override
     public IBinder onBind(final Intent intent) {
         Boolean prepared;
         urlPath = intent.getStringExtra(URLKEY);
-        actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
+//        actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
         Log.d(LOGD, "utl = " + urlPath);
         try {
             Log.d(LOGD, "TRY");
@@ -44,10 +44,11 @@ public class PlayPodcastService extends Service {
 
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    Intent actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
                     // TODO Auto-generated method stub
                     mediaPlayer.pause();
                     mediaPlayer.seekTo(0);
-                    actionIntent.putExtra(ItemActivity.CLOSE_ACTIVITY, true);
+                    actionIntent.putExtra(ItemActivity.FINISH_PLAY, true);
                     sendBroadcast(actionIntent);
                 }
             });
@@ -55,12 +56,23 @@ public class PlayPodcastService extends Service {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(final MediaPlayer mediaPlayer) {
+                    Log.d("ALLOHA", "------------------CALED-------------");
+                    Intent actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
                     actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
                     actionIntent.putExtra(ItemActivity.PROGRESS_BAR_SHOW, true);
-                    Log.d("ALLOHA", "------------------CALED-------------");
                     sendBroadcast(actionIntent);
                     mediaPlayer.start();
                     mediaPlayer.pause();
+
+                    mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                        @Override
+                        public void onSeekComplete(MediaPlayer mediaPlayer) {
+                            Intent actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
+                            actionIntent.putExtra(ItemActivity.PROGRESS_BAR_SHOW, true);
+                            sendBroadcast(actionIntent);
+                        }
+                    });
+
                     br = new BroadcastReceiver() {
                         public void onReceive(Context context, Intent intent) {
                             boolean playOrpause = intent.getBooleanExtra(BROADCAST_TASK, false);
@@ -73,6 +85,7 @@ public class PlayPodcastService extends Service {
                             double result = (double) mediaPlayer.getDuration() * ((double) progress / (double) max);
                             mediaPlayer.pause();
                             mediaPlayer.seekTo((int) result);
+
                             Log.d(PlayPodcastService.LOGD, "result = " + result);
                             mediaPlayer.start();
                         }
@@ -101,11 +114,14 @@ public class PlayPodcastService extends Service {
             mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                 @Override
                 public void onBufferingUpdate(MediaPlayer mediaPlayer, int i) {
+                    Intent actionIntent = new Intent(ItemActivity.BROADCAST_ACTION_ITEMACTIVITY);
                     actionIntent.putExtra(ItemActivity.BROADCAST_TASK_PLAYER_PROGRESS_ITEMACTIVITY, mediaPlayer.getCurrentPosition());
 //                    actionIntent.putExtra(ItemActivity.BROADCAST_TASK_MAX_DURATION_ITEMACTIVITY, mediaPlayer.getDuration());
                     sendBroadcast(actionIntent);
                 }
             });
+
+
 
 
             Log.d(LOGD, "onCreate");
